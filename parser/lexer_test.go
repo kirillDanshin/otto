@@ -5,8 +5,8 @@ import (
 
 	"../terst"
 
-	"github.com/robertkrimen/otto/file"
-	"github.com/robertkrimen/otto/token"
+	"github.com/kirillDanshin/otto/file"
+	"github.com/kirillDanshin/otto/token"
 )
 
 var tt = terst.Terst

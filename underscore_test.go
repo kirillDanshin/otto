@@ -5,7 +5,7 @@ import (
 
 	"./terst"
 
-	"github.com/robertkrimen/otto/underscore"
+	"github.com/kirillDanshin/otto/underscore"
 )
 
 func init() {

@@ -1,11 +1,11 @@
 # parser
 --
-    import "github.com/robertkrimen/otto/parser"
+    import "github.com/kirillDanshin/otto/parser"
 
 Package parser implements a parser for JavaScript.
 
     import (
-        "github.com/robertkrimen/otto/parser"
+        "github.com/kirillDanshin/otto/parser"
     )
 
 Parse and return an AST

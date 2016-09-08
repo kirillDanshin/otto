@@ -56,6 +56,8 @@ func TransformRegExp(pattern string) (string, error) {
 		return "", err
 	}
 
+	fmt.Sprintf("Input: regexp=[%s]", pattern)
+	fmt.Sprintf("Output: regexp=[%s] err=[%s]", parser.goRegexp.String(), err)
 	// Might not be re2 compatible, but is still a valid JavaScript RegExp
 	return parser.goRegexp.String(), err
 }
