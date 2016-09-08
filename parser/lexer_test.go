@@ -1,8 +1,9 @@
 package parser
 
 import (
-	"../terst"
 	"testing"
+
+	"../terst"
 
 	"github.com/robertkrimen/otto/file"
 	"github.com/robertkrimen/otto/token"

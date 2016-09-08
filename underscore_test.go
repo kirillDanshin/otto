@@ -1,8 +1,9 @@
 package otto
 
 import (
-	"./terst"
 	"testing"
+
+	"./terst"
 
 	"github.com/robertkrimen/otto/underscore"
 )
