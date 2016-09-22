@@ -2,10 +2,12 @@ package otto
 
 import (
 	"bytes"
-	"regexp"
+	builtInRegexp "regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/kirillDanshin/otto/regexp"
 )
 
 // String
@@ -153,9 +155,12 @@ func builtinString_match(call FunctionCall) Value {
 	}
 }
 
-var builtinString_replace_Regexp = regexp.MustCompile("\\$(?:[\\$\\&\\'\\`1-9]|0[1-9]|[1-9][0-9])")
+var builtinString_replace_Regexp = builtInRegexp.MustCompile("\\$(?:[\\$\\&\\'\\`1-9]|0[1-9]|[1-9][0-9])")
 
 func builtinString_findAndReplaceString(input []byte, lastIndex int, match []int, target []byte, replaceValue []byte) (output []byte) {
+	if match == nil {
+		return input
+	}
 	matchCount := len(match) / 2
 	output = input
 	if match[0] != lastIndex {
@@ -205,7 +210,7 @@ func builtinString_replace(call FunctionCall) Value {
 			find = -1
 		}
 	} else {
-		search = regexp.MustCompile(regexp.QuoteMeta(searchValue.string()))
+		search = regexp.MustCompile(builtInRegexp.QuoteMeta(searchValue.string()))
 	}
 
 	found := search.FindAllSubmatchIndex(target, find)
@@ -222,6 +227,9 @@ func builtinString_replace(call FunctionCall) Value {
 			target := string(target)
 			replace := replaceValue._object()
 			for _, match := range found {
+				if match == nil {
+					continue //FIXME
+				}
 				if match[0] != lastIndex {
 					result = append(result, target[lastIndex:match[0]]...)
 				}

@@ -1,11 +1,10 @@
 package otto
 
 import (
-	"fmt"
-	"regexp"
+	"log"
 	"unicode/utf8"
 
-	"github.com/kirillDanshin/otto/parser"
+	"github.com/kirillDanshin/otto/regexp"
 )
 
 type _regExpObject struct {
@@ -17,56 +16,68 @@ type _regExpObject struct {
 	flags             string
 }
 
-func (runtime *_runtime) newRegExpObject(pattern string, flags string) *_object {
+const quote = "`"
+
+func (runtime *_runtime) newRegExpObject(pattern, flags string) *_object {
+
+	// re2flags := ""
+	//
+	// // TODO Maybe clean up the panicking here... TypeError, SyntaxError, ?
+	//
+	// for _, chr := range flags {
+	// 	switch chr {
+	// 	case 'g':
+	// 		if global {
+	// 			panic(runtime.panicSyntaxError("newRegExpObject: %s %s", pattern, flags))
+	// 		}
+	// 		global = true
+	// 	case 'm':
+	// 		if multiline {
+	// 			panic(runtime.panicSyntaxError("newRegExpObject: %s %s", pattern, flags))
+	// 		}
+	// 		multiline = true
+	// 		re2flags += "m"
+	// 	case 'i':
+	// 		if ignoreCase {
+	// 			panic(runtime.panicSyntaxError("newRegExpObject: %s %s", pattern, flags))
+	// 		}
+	// 		ignoreCase = true
+	// 		re2flags += "i"
+	// 	}
+	// }
+	//
+	// re2pattern, err := parser.TransformRegExp(pattern)
+	// if err != nil {
+	// 	panic(runtime.panicTypeError("Invalid regular expression: %s", err.Error()))
+	// }
+	// if len(re2flags) > 0 {
+	// 	re2pattern = fmt.Sprintf("(?%s:%s)", re2flags, re2pattern)
+	// }
+	//
+	// regularExpression, err := regexp.Compile(re2pattern)
+	// if err != nil {
+	// 	panic(runtime.panicSyntaxError("Invalid regular expression: %s", err.Error()[22:]))
+	// }
+
 	self := runtime.newObject()
 	self.class = "RegExp"
-
-	global := false
-	ignoreCase := false
-	multiline := false
-	re2flags := ""
-
-	// TODO Maybe clean up the panicking here... TypeError, SyntaxError, ?
-
-	for _, chr := range flags {
-		switch chr {
-		case 'g':
-			if global {
-				panic(runtime.panicSyntaxError("newRegExpObject: %s %s", pattern, flags))
-			}
-			global = true
-		case 'm':
-			if multiline {
-				panic(runtime.panicSyntaxError("newRegExpObject: %s %s", pattern, flags))
-			}
-			multiline = true
-			re2flags += "m"
-		case 'i':
-			if ignoreCase {
-				panic(runtime.panicSyntaxError("newRegExpObject: %s %s", pattern, flags))
-			}
-			ignoreCase = true
-			re2flags += "i"
+	re, err := regexp.Compile(pattern, flags)
+	if err != nil {
+		pattern := regexp.UnescapeUnicode(pattern)
+		var unqerr error
+		re, unqerr = regexp.Compile(pattern, flags)
+		if unqerr != nil {
+			log.Printf("unqerr: %s\n", unqerr)
+			panic(runtime.panicSyntaxError("Invalid regular expression: %s", err))
 		}
 	}
-
-	re2pattern, err := parser.TransformRegExp(pattern)
-	if err != nil {
-		panic(runtime.panicTypeError("Invalid regular expression: %s", err.Error()))
-	}
-	if len(re2flags) > 0 {
-		re2pattern = fmt.Sprintf("(?%s:%s)", re2flags, re2pattern)
-	}
-
-	regularExpression, err := regexp.Compile(re2pattern)
-	if err != nil {
-		panic(runtime.panicSyntaxError("Invalid regular expression: %s", err.Error()[22:]))
-	}
-
+	global := false
+	ignoreCase := false
+	multiline := re.IsMultiline()
 	self.value = _regExpObject{
-		regularExpression: regularExpression,
+		regularExpression: re,
 		global:            global,
-		ignoreCase:        ignoreCase,
+		ignoreCase:        re.IsCaseless(),
 		multiline:         multiline,
 		source:            pattern,
 		flags:             flags,
@@ -96,6 +107,7 @@ func execRegExp(this *_object, target string) (match bool, result []int) {
 	}
 	if 0 > index || index > int64(len(target)) {
 	} else {
+		// result = this.regExpValue().regularExpression.FindStringSubmatchIndex(target[index:])
 		result = this.regExpValue().regularExpression.FindStringSubmatchIndex(target[index:])
 	}
 	if result == nil {
@@ -135,7 +147,7 @@ func execResultToArray(runtime *_runtime, target string, result []int) *_object 
 		// Find the rune index in the string, not the byte index
 		for index := 0; index < result[0]; {
 			_, size := utf8.DecodeRuneInString(target[index:])
-			matchIndex += 1
+			matchIndex++
 			index += size
 		}
 	}

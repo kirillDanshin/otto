@@ -1,8 +1,6 @@
 package otto
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // RegExp
 

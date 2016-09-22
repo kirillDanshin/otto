@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"regexp"
-
 	"github.com/kirillDanshin/otto/ast"
 	"github.com/kirillDanshin/otto/file"
 	"github.com/kirillDanshin/otto/token"
@@ -143,25 +141,27 @@ func (self *_parser) parseRegExpLiteral() *ast.RegExpLiteral {
 	}
 
 	var value string
-	// TODO 15.10
-	{
-		// Test during parsing that this is a valid regular expression
-		// Sorry, (?=) and (?!) are invalid (for now)
-		pattern, err := TransformRegExp(pattern)
-		if err != nil {
-			if pattern == "" || self.mode&IgnoreRegExpErrors == 0 {
-				self.error(idx, "Invalid regular expression: %s", err.Error())
-			}
-		} else {
-			_, err = regexp.Compile(pattern)
-			if err != nil {
-				// We should not get here, ParseRegExp should catch any errors
-				self.error(idx, "Invalid regular expression: %s", err.Error()[22:]) // Skip redundant "parse regexp error"
-			} else {
-				value = pattern
-			}
-		}
-	}
+	// // TODO 15.10
+	// {
+	// 	// Test during parsing that this is a valid regular expression
+	// 	// Sorry, (?=) and (?!) are invalid (for now)
+	// 	pattern, err := TransformRegExp(pattern)
+	// 	if err != nil {
+	// 		if pattern == "" || self.mode&IgnoreRegExpErrors == 0 {
+	// 			self.error(idx, "Invalid regular expression: %s", err.Error())
+	// 		}
+	// 	} else {
+	// 		_, err = regexp.Compile(pattern)
+	// 		if err != nil {
+	// 			// We should not get here, ParseRegExp should catch any errors
+	// 			self.error(idx, "Invalid regular expression: %s", err.Error()[22:]) // Skip redundant "parse regexp error"
+	// 		} else {
+	// 			value = pattern
+	// 		}
+	// 	}
+	// }
+
+	value = pattern
 
 	literal := self.str[offset:endOffset]
 
